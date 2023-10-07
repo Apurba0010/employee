@@ -398,11 +398,96 @@ public class EmployeeManagementSystemGUI {
 
     }
 
-    public void editEmployee(int id) throws SQLException {
+   public void editEmployee() throws SQLException {
         this.menuFrame.setVisible(false);
 
         // Rest of the code...
-         JPanel panel=new JPanel();
+     JFrame frame = new JFrame("Edit Employee");
+
+        JLabel label = new JLabel("Enter employee id");
+        label.setFont(new Font("Times New Roman", Font.BOLD, 20));
+        label.setBounds(250,200,200,50);
+        frame.add(label);
+
+        JTextField idVal = new JTextField();
+        idVal.setFont(new Font("Times New Roman", Font.BOLD, 20));
+        idVal.setBounds(500,200,200,50);
+        frame.add(idVal);
+        idVal.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if ( ((c < '0') || (c > '9')) && (c != KeyEvent.VK_BACK_SPACE)) {
+                    e.consume();  // if it's not a number, ignore the event
+                }
+            }
+        });
+
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+        backButton.setBounds(275, 400, 150,40);
+        backButton.setFocusPainted(false);
+
+        backButton.addActionListener(actionListener -> {
+            menuFrame.setVisible(true);
+            frame.dispose();
+
+        });
+        frame.add(backButton);
+
+        JButton submitButton = new JButton("Submit");
+        submitButton.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+        submitButton.setBounds(525, 400, 150,40);
+        submitButton.setFocusPainted(false);
+
+        submitButton.addActionListener(actionEvent -> {
+            int id = Integer.parseInt(idVal.getText());
+            String q = String.format("select * from employee where id = %d;", id);
+            Statement statement = null;
+            try {
+                statement = this.con.createStatement();
+                ResultSet resultSet = statement.executeQuery(q);
+                if (resultSet.next()) {
+                    System.out.println(resultSet.getString(2));
+    //                    return true;
+                    editEmployeeHelper(id, frame);
+
+                }
+            else{
+                JFrame popup = new JFrame("Invalid ID");
+                JLabel popupMsg = new JLabel("The ID you entered is invalid.");
+                popupMsg.setBounds(20,10,300,50);
+                popupMsg.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+                popup.add(popupMsg);
+
+                JButton button = new JButton("OK");
+                button.setBounds(120,60,70,20);
+                button.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+                button.addActionListener(actionEvent2 -> {
+                    popup.dispose();
+                });
+                popup.add(button);
+
+                popup.setLayout(null);
+                popup.setSize(350, 150);
+                popup.setVisible(true);
+
+                }
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        });
+
+        frame.add(submitButton);
+
+        frame.setLayout(null);
+        frame.setSize(new Dimension(1100,750));
+        frame.setVisible(true);
+    }
+
+    public void editEmployeeHelper(int id, JFrame parentFrame) throws SQLException {
+        JFrame frame = new JFrame("Edit Employee");
+        JPanel panel=new JPanel();
 
         Statement statement = null;
         try {
@@ -526,7 +611,7 @@ public class EmployeeManagementSystemGUI {
             }
 
             menuFrame.setVisible(true);
-           frame.dispose();
+            frame.dispose();
 
         });
         panel.add(submitButton);
